@@ -1,0 +1,73 @@
+{
+	"info": {
+		"_postman_id": "80fc7a48-f0b1-4cc4-8dc3-d4a3cc220de1",
+		"name": "Classes",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Angelo\",\n    \"avatar\": \"https://avatars0.githubusercontent.com/u/48136118?s=460&u=6101d27e8851db314005129fbd5ff2a4a7996880&v=4\",\n    \"whatsapp\": \"13997244863\",\n    \"bio\": \"Student and a friendly person to share knowledge\",\n    \"subject\": \"Matemática\",\n    \"cost\": 80,\n    \"schedule\": [\n        {\n            \"week_day\": 1,\n            \"from\": \"08:00\",\n            \"to\": \"12:00\"\n        },\n        {\n            \"week_day\": 3,\n            \"from\": \"10:00\",\n            \"to\": \"18:00\"\n        },\n        {\n            \"week_day\": 4,\n            \"from\": \"8:00\",\n            \"to\": \"12:00\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/classes",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"classes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/classes?week_day=1&subject=Matemática&time=11:00",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"classes"
+					],
+					"query": [
+						{
+							"key": "week_day",
+							"value": "1"
+						},
+						{
+							"key": "subject",
+							"value": "Matemática"
+						},
+						{
+							"key": "time",
+							"value": "11:00"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
