@@ -1,41 +1,59 @@
 import React from 'react';
 
+import formatToBRL from '../../util/formatToBRL';
+
 import whatsappIcon from '../../assets/images/icons/whatsapp.svg';
+
+import api from '../../services/api';
 
 import './styles.css';
 
-const TeacherItem: React.FC = ({ children }) => {
+export interface Teacher {
+  id: number;
+  subject: string;
+  cost: number;
+  name: string;
+  avatar: string;
+  whatsapp: string;
+  bio: string;
+}
+
+interface TeacherItemProps {
+  teacher: Teacher;
+}
+
+const TeacherItem: React.FC<TeacherItemProps> = ({ children, teacher }) => {
+  function createNewConnection() {
+    api.post('connections', {
+      user_id: teacher.id,
+    });
+  }
+
   return (
     <article className="teacher-item">
       <header>
-        <img
-          src="https://avatars0.githubusercontent.com/u/48136118?s=460&u=6101d27e8851db314005129fbd5ff2a4a7996880&v=4"
-          alt="Angelo Evangelista"
-        />
+        <img src={teacher.avatar} alt={teacher.name} />
         <div>
-          <strong>Angelo Evangelista</strong>
-          <span>Matemática</span>
+          <strong>{teacher.name}</strong>
+          <span>{teacher.subject}</span>
         </div>
       </header>
 
-      <p>
-        Lorem ipsum is placeholder text commonly used in the graphic, print, and
-        publishing industries for previewing layouts and visual mockups.
-        <br />
-        <br />
-        Lorem ipsum is placeholder text commonly used in the graphic, print, and
-        publishing industries for previewing layouts and visual mockups.
-      </p>
+      <p>{teacher.bio}</p>
 
       <footer>
         <p>
           Preço/hora
-          <strong>R$ 80,00</strong>
+          <strong>{formatToBRL(teacher.cost)}</strong>
         </p>
-        <button type="button">
+        <a
+          onClick={createNewConnection}
+          target="blank"
+          href={`https://wa.me/${teacher.whatsapp}`}
+        >
           <img src={whatsappIcon} alt="Entrar em contato" />
-          Entrar em contato
-        </button>
+          Entrar em contatos
+        </a>
       </footer>
     </article>
   );
