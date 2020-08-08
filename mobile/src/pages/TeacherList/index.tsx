@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Feather } from '@expo/vector-icons';
 import { Picker } from '@react-native-community/picker';
 import { BorderlessButton, RectButton } from 'react-native-gesture-handler';
-import { View, ScrollView, Text, TextInput } from 'react-native';
+import { View, ScrollView, Text, TextInput, ToastAndroid } from 'react-native';
+
+import api from '../../services/api';
 
 import PageHeader from '../../components/PageHeader';
-import TeacherItem from '../../components/TeacherItem';
+import TeacherItem, { Teacher } from '../../components/TeacherItem';
 
 import styles from './styles';
 
@@ -14,11 +16,38 @@ import weekDays from '../../util/WeekDays.json';
 const TeacherList: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
 
+  const [subject, setSubject] = useState('');
+  const [week_day, setWeekDay] = useState(1);
+  const [time, setTime] = useState('');
+
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+
   function handleToggleFiltersVisibility() {
     setShowFilters(!showFilters);
   }
 
-  function handleSubmit() {}
+  async function handleFiltersSubmit() {
+    const data = {
+      subject,
+      week_day,
+      time,
+    };
+
+    if (!subject || !week_day || !time) {
+      return ToastAndroid.show('Forneça todas as informações necessárias', 5);
+    }
+
+    try {
+      const response = await api.get<Teacher[]>('classes', {
+        params: data,
+      });
+
+      setTeachers(response.data);
+      setShowFilters(false);
+    } catch (error) {
+      ToastAndroid.show('Houve uma falha no servidor', 5);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -37,6 +66,9 @@ const TeacherList: React.FC = () => {
               style={styles.input}
               placeholder="Qual a matéria?"
               placeholderTextColor="#c1bccc"
+              value={subject}
+              onChangeText={(value) => setSubject(value)}
+              returnKeyType="next"
             />
 
             <View style={styles.inputGroup}>
@@ -44,14 +76,14 @@ const TeacherList: React.FC = () => {
                 <Text style={styles.label}>Dia da semana</Text>
                 <View style={styles.input}>
                   <Picker
-                    selectedValue={weekDays[0].id}
-                    onValueChange={() => {}}
+                    selectedValue={week_day}
+                    onValueChange={(value) => setWeekDay(Number(value))}
                   >
                     {weekDays.map((day) => (
                       <Picker.Item
                         key={String(day.id)}
                         label={day.name}
-                        value={day.name}
+                        value={day.id}
                       />
                     ))}
                   </Picker>
@@ -64,11 +96,16 @@ const TeacherList: React.FC = () => {
                   style={styles.input}
                   placeholder="Qual horário?"
                   placeholderTextColor="#c1bccc"
+                  value={time}
+                  onChangeText={(value) => setTime(value)}
                 />
               </View>
             </View>
 
-            <RectButton onPress={handleSubmit} style={styles.submitButton}>
+            <RectButton
+              onPress={handleFiltersSubmit}
+              style={styles.submitButton}
+            >
               <Text style={styles.submitButtonText}>Filtrar</Text>
             </RectButton>
           </View>
@@ -82,13 +119,9 @@ const TeacherList: React.FC = () => {
           paddingBottom: 16,
         }}
       >
-        <TeacherItem />
-        <TeacherItem />
-        <TeacherItem />
-        <TeacherItem />
-        <TeacherItem />
-        <TeacherItem />
-        <TeacherItem />
+        {teachers.map((teacher) => (
+          <TeacherItem key={String(teacher.id)} teacher={teacher} />
+        ))}
       </ScrollView>
     </View>
   );

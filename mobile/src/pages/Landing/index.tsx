@@ -1,7 +1,9 @@
-import React from 'react';
-import { View, Text, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, ToastAndroid } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
+
+import api from '../../services/api';
 
 import landingImg from '../../assets/images/landing.png';
 import studyIcon from '../../assets/images/icons/study.png';
@@ -11,7 +13,22 @@ import heartIcon from '../../assets/images/icons/heart.png';
 import styles from './styles';
 
 const Landing: React.FC = () => {
+  const [totalConnections, setTotalConnections] = useState(0);
   const { navigate } = useNavigation();
+
+  useEffect(() => {
+    async function loadConnections() {
+      try {
+        const response = await api.get('connections');
+
+        setTotalConnections(response.data.total);
+      } catch (error) {
+        ToastAndroid.show('Houve uma falha no servidor', 5);
+      }
+    }
+
+    loadConnections();
+  }, []);
 
   function handleNavigateToGiveClassesPage() {
     navigate('GiveClasses');
@@ -51,7 +68,7 @@ const Landing: React.FC = () => {
       </View>
 
       <Text style={styles.totalConnections}>
-        Total de 285 conexões já realizadas {'  '}
+        Total de {totalConnections} conexões já realizadas {'  '}
         <Image source={heartIcon} />
       </Text>
     </View>
