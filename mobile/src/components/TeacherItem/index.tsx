@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Image, Text, Linking } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-community/async-storage';
 
 import formatToBRL from '../../util/formatToBRL';
 
-import heartOutlineIcon from '../../assets/images/icons/heart-outline.png';
-import unfavoriteIcon from '../../assets/images/icons/unfavorite.png';
 import whatsappIcon from '../../assets/images/icons/whatsapp.png';
+import unfavoriteIcon from '../../assets/images/icons/unfavorite.png';
+import heartOutlineIcon from '../../assets/images/icons/heart-outline.png';
 
 import styles from './styles';
 
@@ -22,11 +23,44 @@ export interface Teacher {
 
 interface TeacherItemProps {
   teacher: Teacher;
+  favorited: boolean;
 }
 
-const TeacherItem: React.FC<TeacherItemProps> = ({ teacher }) => {
+const TeacherItem: React.FC<TeacherItemProps> = ({ teacher, favorited }) => {
+  const [isFavorited, setIsfavorited] = useState(favorited);
+
   function handleLinkToWhatsapp() {
     Linking.openURL(`whatsapp://send?phone=+55${teacher.whatsapp}`);
+  }
+
+  async function handleToggleFavorite() {
+    const storedFavorites = await AsyncStorage.getItem('@proffy/favorites');
+
+    if (isFavorited) {
+      const serializedFavorites: Teacher[] = storedFavorites
+        ? JSON.parse(storedFavorites)
+        : [];
+
+      await AsyncStorage.setItem(
+        '@proffy/favorites',
+        JSON.stringify(
+          serializedFavorites.filter(
+            (storedTeacher) => storedTeacher.id !== teacher.id
+          )
+        )
+      );
+    } else {
+      const serializedFavorites: Teacher[] = storedFavorites
+        ? [...JSON.parse(storedFavorites), teacher]
+        : [teacher];
+
+      await AsyncStorage.setItem(
+        '@proffy/favorites',
+        JSON.stringify(serializedFavorites)
+      );
+    }
+
+    setIsfavorited(!isFavorited);
   }
 
   return (
@@ -49,9 +83,15 @@ const TeacherItem: React.FC<TeacherItemProps> = ({ teacher }) => {
         </Text>
 
         <View style={styles.buttonsContainer}>
-          <RectButton style={[styles.favoriteButton, styles.favorited]}>
-            {/* <Image source={heartOutlineIcon} /> */}
-            <Image source={unfavoriteIcon} />
+          <RectButton
+            onPress={handleToggleFavorite}
+            style={[styles.favoriteButton, isFavorited && styles.favorited]}
+          >
+            {isFavorited ? (
+              <Image source={unfavoriteIcon} />
+            ) : (
+              <Image source={heartOutlineIcon} />
+            )}
           </RectButton>
 
           <RectButton

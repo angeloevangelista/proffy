@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Feather } from '@expo/vector-icons';
 import { Picker } from '@react-native-community/picker';
+import AsyncStorage from '@react-native-community/async-storage';
 import { BorderlessButton, RectButton } from 'react-native-gesture-handler';
 import { View, ScrollView, Text, TextInput, ToastAndroid } from 'react-native';
 
@@ -14,34 +15,41 @@ import styles from './styles';
 import weekDays from '../../util/WeekDays.json';
 
 const TeacherList: React.FC = () => {
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [favorites, setFavorites] = useState<Teacher[]>([]);
 
   const [subject, setSubject] = useState('');
   const [week_day, setWeekDay] = useState(1);
   const [time, setTime] = useState('');
 
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  async function loadFavorites() {
+    const storedFavorites = await AsyncStorage.getItem('@proffy/favorites');
+
+    if (storedFavorites) {
+      setFavorites(JSON.parse(storedFavorites));
+    }
+  }
 
   function handleToggleFiltersVisibility() {
     setShowFilters(!showFilters);
   }
 
   async function handleFiltersSubmit() {
-    const data = {
-      subject,
-      week_day,
-      time,
-    };
-
     if (!subject || !week_day || !time) {
       return ToastAndroid.show('Forneça todas as informações necessárias', 5);
     }
 
     try {
       const response = await api.get<Teacher[]>('classes', {
-        params: data,
+        params: {
+          subject,
+          week_day,
+          time,
+        },
       });
 
+      loadFavorites();
       setTeachers(response.data);
       setShowFilters(false);
     } catch (error) {
@@ -120,7 +128,15 @@ const TeacherList: React.FC = () => {
         }}
       >
         {teachers.map((teacher) => (
-          <TeacherItem key={String(teacher.id)} teacher={teacher} />
+          <TeacherItem
+            key={String(teacher.id)}
+            teacher={teacher}
+            favorited={
+              favorites.findIndex(
+                (favoritedTeacher) => favoritedTeacher.id === teacher.id
+              ) !== -1
+            }
+          />
         ))}
       </ScrollView>
     </View>
