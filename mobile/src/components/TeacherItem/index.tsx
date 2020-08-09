@@ -5,6 +5,8 @@ import AsyncStorage from '@react-native-community/async-storage';
 
 import formatToBRL from '../../util/formatToBRL';
 
+import api from '../../services/api';
+
 import whatsappIcon from '../../assets/images/icons/whatsapp.png';
 import unfavoriteIcon from '../../assets/images/icons/unfavorite.png';
 import heartOutlineIcon from '../../assets/images/icons/heart-outline.png';
@@ -30,6 +32,7 @@ const TeacherItem: React.FC<TeacherItemProps> = ({ teacher, favorited }) => {
   const [isFavorited, setIsfavorited] = useState(favorited);
 
   function handleLinkToWhatsapp() {
+    handleAddNewConnection();
     Linking.openURL(`whatsapp://send?phone=+55${teacher.whatsapp}`);
   }
 
@@ -61,6 +64,12 @@ const TeacherItem: React.FC<TeacherItemProps> = ({ teacher, favorited }) => {
     }
 
     setIsfavorited(!isFavorited);
+  }
+
+  function handleAddNewConnection() {
+    api.post('connections', {
+      user_id: teacher.id,
+    });
   }
 
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, ToastAndroid } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 import api from '../../services/api';
 
@@ -16,19 +16,25 @@ const Landing: React.FC = () => {
   const [totalConnections, setTotalConnections] = useState(0);
   const { navigate } = useNavigation();
 
-  useEffect(() => {
-    async function loadConnections() {
-      try {
-        const response = await api.get('connections');
+  async function loadConnections() {
+    try {
+      const response = await api.get('connections');
 
-        setTotalConnections(response.data.total);
-      } catch (error) {
-        ToastAndroid.show('Houve uma falha no servidor', 5);
-      }
+      setTotalConnections(response.data.total);
+    } catch (error) {
+      ToastAndroid.show('Houve uma falha no servidor', 5);
     }
+  }
 
+  useEffect(() => {
     loadConnections();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadConnections();
+    }, [])
+  );
 
   function handleNavigateToGiveClassesPage() {
     navigate('GiveClasses');
