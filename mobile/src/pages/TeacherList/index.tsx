@@ -24,11 +24,10 @@ const TeacherList: React.FC = () => {
   const [time, setTime] = useState('');
 
   async function loadFavorites() {
-    const storedFavorites = await AsyncStorage.getItem('@proffy/favorites');
+    const storedFavorites =
+      (await AsyncStorage.getItem('@proffy/favorites')) || '';
 
-    if (storedFavorites) {
-      setFavorites(JSON.parse(storedFavorites));
-    }
+    setFavorites(JSON.parse(storedFavorites));
   }
 
   function handleToggleFiltersVisibility() {
